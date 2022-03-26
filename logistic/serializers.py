@@ -47,11 +47,20 @@ class StockSerializer(serializers.ModelSerializer):
         # достаем связанные данные для других таблиц
         positions = validated_data.pop('positions')
         stock = super().update(instance, validated_data)
-        for position in positions:
-            items = StockProduct.objects.filter(stock=stock)
-            for item in items:
-                if item.product == position.get('product'):
-                    item.quantity = position.get('quantity')
-                    item.price = position.get('price')
-                    item.save()
+        # for position in positions:
+        #     items = StockProduct.objects.filter(stock=stock)
+        #     for item in items:
+        #         if item.product == position.get('product'):
+        #             item.quantity = position.get('quantity')
+        #             item.price = position.get('price')
+        #             item.save()
+
+        for item in positions:
+            StockProduct. \
+                objects.update_or_create(defaults={'quantity': item['quantity'],
+                                                   'price': item['price']
+                                                   },
+                                         product=item['product'],
+                                         stock=stock
+                                         )
         return stock
